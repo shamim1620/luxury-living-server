@@ -21,6 +21,11 @@ async function run() {
         const serviceCollection = database.collection('services');
         const messageCollection = database.collection('messages');
 
+        app.get('/services', async (req, res) => {
+            const cursor = serviceCollection.find({});
+            const services = await cursor.toArray();
+            res.json(services);
+        })
 
         app.post('/services', async (req, res) => {
             const serviceTitle = req.body.serviceTitle;
