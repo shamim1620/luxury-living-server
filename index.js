@@ -1,5 +1,6 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
+const ObjectId = require('mongodb').ObjectId;
 const cors = require('cors');
 require('dotenv').config()
 const app = express();
@@ -18,14 +19,26 @@ async function run() {
     try {
         await client.connect();
         const database = client.db('luxury_living');
-        const serviceCollection = database.collection('services');
+        const servicesCollection = database.collection('services');
         const projectsCollection = database.collection('projects');
         const messageCollection = database.collection('messages');
+        const usersCollection = database.collection('users');
 
         app.get('/services', async (req, res) => {
-            const cursor = serviceCollection.find({});
+            const cursor = servicesCollection.find({});
             const services = await cursor.toArray();
             res.json(services);
+        })
+        app.get('/projects', async (req, res) => {
+            const cursor = projectsCollection.find({});
+            const projects = await cursor.toArray();
+            res.json(projects);
+        })
+        app.get('/services/:_id', async (req, res) => {
+            const id = req.params._id;
+            const query = { _id: ObjectId(id) };
+            const result = await servicesCollection.findOne(query);
+            res.json(result);
         })
 
         app.post('/services', async (req, res) => {
@@ -40,7 +53,7 @@ async function run() {
                 description,
                 image: imageBuffer
             }
-            const result = await serviceCollection.insertOne(service);
+            const result = await servicesCollection.insertOne(service);
 
             res.json(result);
         })
@@ -62,10 +75,22 @@ async function run() {
         app.post('/messages', async (req, res) => {
             const message = req.body;
             console.log('api is hitted', message);
-
             const result = await messageCollection.insertOne(message);
-
             res.json(result);
+        })
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            res.json(result)
+        })
+        app.put('/users', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const options = { upsert: true };
+            const updateDoc = { $set: user };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.json(result);
+
         })
 
     }
