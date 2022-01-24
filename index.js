@@ -19,6 +19,7 @@ async function run() {
         await client.connect();
         const database = client.db('luxury_living');
         const serviceCollection = database.collection('services');
+        const projectsCollection = database.collection('projects');
         const messageCollection = database.collection('messages');
 
         app.get('/services', async (req, res) => {
@@ -41,6 +42,20 @@ async function run() {
             }
             const result = await serviceCollection.insertOne(service);
 
+            res.json(result);
+        })
+        app.post('/projects', async (req, res) => {
+            const projectTitle = req.body.projectTitle;
+            const pic = req.files.image;
+            const picData = pic.data;
+            const encodedPic = picData.toString('base64');
+            const imageBuffer = Buffer.from(encodedPic, 'base64');
+
+            const project = {
+                projectTitle,
+                image: imageBuffer
+            }
+            const result = await projectsCollection.insertOne(project);
             res.json(result);
         })
 
