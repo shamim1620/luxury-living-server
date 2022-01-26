@@ -23,6 +23,7 @@ async function run() {
         const projectsCollection = database.collection('projects');
         const messageCollection = database.collection('messages');
         const usersCollection = database.collection('users');
+        const ordersCollection = database.collection('orders');
 
         app.get('/services', async (req, res) => {
             const cursor = servicesCollection.find({});
@@ -39,6 +40,23 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const result = await servicesCollection.findOne(query);
             res.json(result);
+        })
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            let isAdmin = false;
+            if (user?.role === 'admin') {
+                isAdmin = true;
+            }
+            res.json({ admin: isAdmin });
+        })
+        app.get('/orders/:email',async(req,res)=>{
+            const email=req.params.email;
+            const query={email:email};
+            const cursor=await ordersCollection.find(query)
+            const result=await cursor.toArray();
+            res.json(result)
         })
 
         app.post('/services', async (req, res) => {
@@ -82,6 +100,11 @@ async function run() {
             const user = req.body;
             const result = await usersCollection.insertOne(user);
             res.json(result)
+        })
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+            const result = await ordersCollection.insertOne(order);
+            res.json(result);
         })
         app.put('/users', async (req, res) => {
             const user = req.body;
