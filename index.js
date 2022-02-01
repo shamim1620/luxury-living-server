@@ -51,11 +51,11 @@ async function run() {
             }
             res.json({ admin: isAdmin });
         })
-        app.get('/orders/:email',async(req,res)=>{
-            const email=req.params.email;
-            const query={email:email};
-            const cursor=await ordersCollection.find(query)
-            const result=await cursor.toArray();
+        app.get('/orders/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const cursor = await ordersCollection.find(query)
+            const result = await cursor.toArray();
             res.json(result)
         })
 
@@ -120,6 +120,13 @@ async function run() {
             const filter = { email: user.email };
             const updateDoc = { $set: { role: 'admin' } }
             const result = await usersCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        })
+
+        app.delete('/orders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await ordersCollection.deleteOne(query);
             res.json(result);
         })
 
